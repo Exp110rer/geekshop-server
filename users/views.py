@@ -5,7 +5,7 @@ from django.contrib import auth
 from django.urls import reverse
 from django.contrib import messages
 from baskets.models import Basket
-from baskets.views import totals
+from baskets.utils import totals
 
 
 # Create your views here.
@@ -55,9 +55,10 @@ def profile(request):
             HttpResponseRedirect(reverse('users:profile'))
     else:
         profile_form = UserProfileForm(instance=request.user)
+    baskets = Basket.objects.filter(user=request.user)
     data = {'title': 'Profile page',
             'form': profile_form,
-            'baskets': Basket.objects.filter(user=request.user),
-            'total_sum': totals(user=request.user)[0],
-            'total_quantity': totals(user=request.user)[1]}
+            'baskets': baskets,
+            'total_sum': totals(baskets=baskets)[0],
+            'total_quantity': totals(baskets=baskets)[1]}
     return render(request, 'users/profile.html', context=data)

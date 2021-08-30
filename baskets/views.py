@@ -23,11 +23,3 @@ def basket_remove(request, basket_id):
     basket.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-
-def totals(user):
-    total_s = 0
-    total_q = 0
-    for basket in Basket.objects.filter(user=user):
-        total_s += basket.sum()
-        total_q += basket.quantity
-    return total_s, total_q
