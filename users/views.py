@@ -1,8 +1,11 @@
 from django.shortcuts import render
-from users.forms import UserLoginForm, UserRegistrationForm
+from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth
 from django.urls import reverse
+from django.contrib import messages
+from baskets.models import Basket
+from baskets.utils import totals
 
 
 # Create your views here.
@@ -29,6 +32,7 @@ def registration(request):
         registration_form = UserRegistrationForm(data=request.POST)
         if registration_form.is_valid():
             registration_form.save()
+            messages.success(request, 'You have successfully registered')
             return HttpResponseRedirect(reverse('users:login'))
         else:
             print(registration_form.errors)
@@ -41,3 +45,20 @@ def registration(request):
 def logout(request):
     auth.logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+
+def profile(request):
+    if request.method == 'POST':
+        profile_form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
+        if profile_form.is_valid():
+            profile_form.save()
+            HttpResponseRedirect(reverse('users:profile'))
+    else:
+        profile_form = UserProfileForm(instance=request.user)
+    baskets = Basket.objects.filter(user=request.user)
+    data = {'title': 'Profile page',
+            'form': profile_form,
+            'baskets': baskets,
+            'total_sum': totals(baskets=baskets)[0],
+            'total_quantity': totals(baskets=baskets)[1]}
+    return render(request, 'users/profile.html', context=data)
