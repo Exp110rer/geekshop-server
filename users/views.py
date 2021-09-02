@@ -5,7 +5,7 @@ from django.contrib import auth
 from django.urls import reverse
 from django.contrib import messages
 from baskets.models import Basket
-from baskets.utils import totals
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -47,6 +47,7 @@ def logout(request):
     return HttpResponseRedirect(reverse('index'))
 
 
+@login_required
 def profile(request):
     if request.method == 'POST':
         profile_form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
@@ -59,6 +60,5 @@ def profile(request):
     data = {'title': 'Profile page',
             'form': profile_form,
             'baskets': baskets,
-            'total_sum': totals(baskets=baskets)[0],
-            'total_quantity': totals(baskets=baskets)[1]}
+            }
     return render(request, 'users/profile.html', context=data)
